@@ -68,7 +68,7 @@
 		issueBtn.disabled = true;
 		issueBtn.textContent = "Creating...";
 		try {
-			const res = await fetch("/api/vouchers", {
+			const res = await fetch("/api/voucher", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({}),
@@ -137,13 +137,13 @@
 			const qrImg = card.querySelector(".qr");
 
 			qrToggle.addEventListener("click", () => {
-				if (!qrImg.src) qrImg.src = "/api/vouchers/" + encodeURIComponent(entry.code) + "/qr?t=" + Date.now();
+				if (!qrImg.src) qrImg.src = "/api/voucher/" + encodeURIComponent(entry.code) + "/qr?t=" + Date.now();
 				qrImg.hidden = !qrImg.hidden;
 				qrToggle.textContent = qrImg.hidden ? "Show QR" : "Hide QR";
 			});
 
 			try {
-				const res = await fetch("/api/vouchers/" + encodeURIComponent(entry.code));
+				const res = await fetch("/api/voucher/" + encodeURIComponent(entry.code));
 				if (res.ok) {
 					const voucher = await res.json();
 					badge.outerHTML = statusBadge(voucher.status);
@@ -173,7 +173,7 @@
 		redeemResult.style.display = "block";
 
 		try {
-			const res = await fetch("/api/vouchers/" + encodeURIComponent(code) + "/redeem", { method: "POST" });
+			const res = await fetch("/api/voucher/" + encodeURIComponent(code) + "/redeem", { method: "POST" });
 			if (res.status === 404) {
 				redeemResult.className = "result err";
 				redeemResult.textContent = "No voucher found with that code.";

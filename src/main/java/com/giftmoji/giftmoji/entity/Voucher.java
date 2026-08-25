@@ -13,7 +13,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "vouchers")
+@Table(name = "voucher")
 @Getter
 public class Voucher {
 
