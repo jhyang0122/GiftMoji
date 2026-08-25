@@ -7,12 +7,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "vouchers")
+@Getter
 public class Voucher {
 
 	@Id
@@ -41,30 +43,6 @@ public class Voucher {
 		voucher.createdAt = Instant.now();
 		voucher.expiresAt = expiresAt;
 		return voucher;
-	}
-
-	public UUID getId() {
-		return id;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public VoucherStatus getStatus() {
-		return status;
-	}
-
-	public Instant getCreatedAt() {
-		return createdAt;
-	}
-
-	public Instant getExpiresAt() {
-		return expiresAt;
-	}
-
-	public Instant getRedeemedAt() {
-		return redeemedAt;
 	}
 
 	public boolean isExpired(Instant now) {
