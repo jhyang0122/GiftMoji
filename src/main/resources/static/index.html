@@ -46,7 +46,8 @@
 			<input id="redeemCode" placeholder="Voucher code" autocomplete="off">
 			<button id="scanBtn" class="ghost-btn" hidden>Scan</button>
 		</div>
-		<video id="scanVideo" class="scan-video" playsinline hidden></video>
+		<video id="scanVideo" class="scan-video" playsinline muted hidden></video>
+		<canvas id="scanCanvas" hidden></canvas>
 		<button id="redeemBtn" class="primary-btn">Redeem</button>
 		<div id="redeemResult" class="result"></div>
 	</section>
@@ -64,6 +65,7 @@
 	</button>
 </nav>
 
+<script src="/js/vendor/jsQR.min.js" defer></script>
 <script src="/js/app.js" defer></script>
 </body>
 </html>
