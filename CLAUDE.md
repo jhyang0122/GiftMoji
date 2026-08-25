@@ -72,7 +72,7 @@ An alternative (receiver self-redeems with a button tap) is simpler to build but
 
 ## 7. Data model sketch
 
-Fits the existing Spring Boot / JPA / PostgreSQL stack:
+Fits the existing Spring Boot / JPA / Azure SQL Database (SQL Server) stack:
 
 - `User(id, name, email, phone, passwordHash, createdAt)`
 - `Merchant(id, name, description, logoUrl)`
