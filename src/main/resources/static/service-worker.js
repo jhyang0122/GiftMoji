@@ -1,4 +1,4 @@
-const CACHE_NAME = "giftmoji-shell-v2";
+const CACHE_NAME = "giftmoji-shell-v3";
 const APP_SHELL = [
 	"/",
 	"/css/app.css",
