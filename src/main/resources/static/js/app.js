@@ -163,6 +163,7 @@
 	const redeemResult = document.getElementById("redeemResult");
 	const scanBtn = document.getElementById("scanBtn");
 	const scanVideo = document.getElementById("scanVideo");
+	const scanCanvas = document.getElementById("scanCanvas");
 
 	redeemBtn.addEventListener("click", async () => {
 		const code = redeemCodeInput.value.trim();
@@ -187,12 +188,14 @@
 		}
 	});
 
-	// Camera QR scanning where the browser supports it natively (Chrome/Android).
-	// No BarcodeDetector on this browser (notably iOS Safari) -> manual entry only.
+	// Camera QR scanning: native BarcodeDetector where available (Chrome/Android),
+	// falling back to the vendored jsQR decoder elsewhere (notably iOS Safari,
+	// which has no BarcodeDetector) so scanning works on effectively any phone.
 	let scanStream = null;
 	let scanning = false;
+	const canvasCtx = scanCanvas.getContext("2d", { willReadFrequently: true });
 
-	if ("BarcodeDetector" in window) {
+	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && ("BarcodeDetector" in window || typeof window.jsQR === "function")) {
 		scanBtn.hidden = false;
 	}
 
@@ -218,14 +221,21 @@
 		scanning = true;
 		scanBtn.textContent = "Stop";
 
+		if ("BarcodeDetector" in window) {
+			scanWithBarcodeDetector();
+		} else {
+			scanWithJsQr();
+		}
+	}
+
+	function scanWithBarcodeDetector() {
 		const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
 		const loop = async () => {
 			if (!scanning) return;
 			try {
 				const codes = await detector.detect(scanVideo);
 				if (codes.length > 0) {
-					redeemCodeInput.value = codes[0].rawValue;
-					stopScanning();
+					onCodeScanned(codes[0].rawValue);
 					return;
 				}
 			} catch (e) {
@@ -234,6 +244,30 @@
 			requestAnimationFrame(loop);
 		};
 		requestAnimationFrame(loop);
+	}
+
+	function scanWithJsQr() {
+		const loop = () => {
+			if (!scanning) return;
+			if (scanVideo.readyState === scanVideo.HAVE_ENOUGH_DATA && scanVideo.videoWidth > 0) {
+				scanCanvas.width = scanVideo.videoWidth;
+				scanCanvas.height = scanVideo.videoHeight;
+				canvasCtx.drawImage(scanVideo, 0, 0, scanCanvas.width, scanCanvas.height);
+				const frame = canvasCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+				const result = window.jsQR(frame.data, frame.width, frame.height, { inversionAttempts: "dontInvert" });
+				if (result && result.data) {
+					onCodeScanned(result.data);
+					return;
+				}
+			}
+			requestAnimationFrame(loop);
+		};
+		requestAnimationFrame(loop);
+	}
+
+	function onCodeScanned(value) {
+		redeemCodeInput.value = value;
+		stopScanning();
 	}
 
 	function stopScanning() {
