@@ -20,7 +20,7 @@ public record VoucherResponse(
 				voucher.getCreatedAt(),
 				voucher.getExpiresAt(),
 				voucher.getRedeemedAt(),
-				"/api/vouchers/" + voucher.getCode() + "/qr"
+				"/api/voucher/" + voucher.getCode() + "/qr"
 		);
 	}
 }
