@@ -1,8 +1,8 @@
 package com.giftmoji.giftmoji.controller;
 
-import com.giftmoji.giftmoji.dto.IssueVoucherRequest;
-import com.giftmoji.giftmoji.dto.RedeemResponse;
-import com.giftmoji.giftmoji.dto.VoucherResponse;
+import com.giftmoji.giftmoji.api.IssueVoucherRequest;
+import com.giftmoji.giftmoji.api.RedeemResponse;
+import com.giftmoji.giftmoji.api.VoucherResponse;
 import com.giftmoji.giftmoji.entity.Voucher;
 import com.giftmoji.giftmoji.service.QrCodeService;
 import com.giftmoji.giftmoji.service.RedemptionResult;

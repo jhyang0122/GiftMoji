@@ -1,4 +1,4 @@
-package com.giftmoji.giftmoji.dto;
+package com.giftmoji.giftmoji.api;
 
 import com.giftmoji.giftmoji.entity.Voucher;
 import com.giftmoji.giftmoji.entity.VoucherStatus;
