@@ -31,6 +31,7 @@ dependencies {
 	implementation 'com.google.zxing:core:3.5.3'
 	implementation 'com.google.zxing:javase:3.5.3'
 	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
