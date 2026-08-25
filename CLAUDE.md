@@ -93,3 +93,7 @@ Fits the existing Spring Boot / JPA / PostgreSQL stack:
 
 - Azure App Service F1 (free tier) means cold starts and limited resources — keep the app lightweight, avoid heavy background processing, and prefer a simple scheduled expiry sweep over a queuing system.
 - Mobile-first responsive web satisfies "usable anywhere via smartphone" without committing to a native app.
+
+## Git Style Guide
+- Never make direct changes to the main worktree.
+- Always create a new feature branch (e.g., `git checkout -b feature/name`) before editing files or running builds.
