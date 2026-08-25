@@ -8,7 +8,8 @@ import java.util.Map;
 @RestController
 public class HomeController {
 
-	@GetMapping("/")
+	// Static index.html serves "/" (the PWA app shell); this stays off that path.
+	@GetMapping("/api/status")
 	public Map<String, String> home() {
 		return Map.of(
 				"service", "GiftMoji",
