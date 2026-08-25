@@ -3,14 +3,14 @@ package com.giftmoji.giftmoji.api;
 import com.giftmoji.giftmoji.entity.Voucher;
 import com.giftmoji.giftmoji.entity.VoucherStatus;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record VoucherResponse(
 		String code,
 		VoucherStatus status,
-		Instant createdAt,
-		Instant expiresAt,
-		Instant redeemedAt,
+		LocalDateTime createdAt,
+		LocalDateTime expiresAt,
+		LocalDateTime redeemedAt,
 		String qrUrl
 ) {
 	public static VoucherResponse from(Voucher voucher) {
