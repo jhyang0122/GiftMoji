@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -26,26 +26,26 @@ public class Voucher {
 	@Enumerated(EnumType.STRING)
 	private VoucherStatus status;
 
-	private Instant createdAt;
+	private LocalDateTime createdAt;
 
-	private Instant expiresAt;
+	private LocalDateTime expiresAt;
 
-	private Instant redeemedAt;
+	private LocalDateTime redeemedAt;
 
 	protected Voucher() {
 		// JPA
 	}
 
-	public static Voucher issue(String code, Instant expiresAt) {
+	public static Voucher issue(String code, LocalDateTime expiresAt) {
 		Voucher voucher = new Voucher();
 		voucher.code = code;
 		voucher.status = VoucherStatus.ISSUED;
-		voucher.createdAt = Instant.now();
+		voucher.createdAt = LocalDateTime.now();
 		voucher.expiresAt = expiresAt;
 		return voucher;
 	}
 
-	public boolean isExpired(Instant now) {
+	public boolean isExpired(LocalDateTime now) {
 		return now.isAfter(expiresAt);
 	}
 
@@ -53,7 +53,7 @@ public class Voucher {
 		this.status = VoucherStatus.EXPIRED;
 	}
 
-	public void markRedeemed(Instant now) {
+	public void markRedeemed(LocalDateTime now) {
 		this.status = VoucherStatus.REDEEMED;
 		this.redeemedAt = now;
 	}

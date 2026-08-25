@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class VoucherService {
 	@Transactional
 	public Voucher issueVoucher(Integer expiryDays) {
 		int days = expiryDays != null ? expiryDays : DEFAULT_EXPIRY_DAYS;
-		Instant expiresAt = Instant.now().plus(days, ChronoUnit.DAYS);
+		LocalDateTime expiresAt = LocalDateTime.now().plus(days, ChronoUnit.DAYS);
 		Voucher voucher = Voucher.issue(generateCode(), expiresAt);
 		voucher = voucherRepository.save(voucher);
 		log.info("Issued voucher {} expiring at {}", maskCode(voucher.getCode()), voucher.getExpiresAt());
@@ -53,7 +53,7 @@ public class VoucherService {
 		}
 
 		Voucher voucher = found.get();
-		Instant now = Instant.now();
+		LocalDateTime now = LocalDateTime.now();
 
 		if (voucher.getStatus() == VoucherStatus.REDEEMED) {
 			log.info("Voucher {} already redeemed at {}", maskCode(code), voucher.getRedeemedAt());
