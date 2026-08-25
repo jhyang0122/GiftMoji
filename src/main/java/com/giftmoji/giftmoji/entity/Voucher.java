@@ -10,12 +10,17 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Entity
 @Table(name = "voucher")
 @Getter
 public class Voucher {
+
+	// Timestamps are wall-clock Sydney local time regardless of the deployment
+	// host's own default zone (Azure App Service defaults to UTC).
+	public static final ZoneId LOCAL_ZONE = ZoneId.of("Australia/Sydney");
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -40,7 +45,7 @@ public class Voucher {
 		Voucher voucher = new Voucher();
 		voucher.code = code;
 		voucher.status = VoucherStatus.ISSUED;
-		voucher.createdAt = LocalDateTime.now();
+		voucher.createdAt = LocalDateTime.now(LOCAL_ZONE);
 		voucher.expiresAt = expiresAt;
 		return voucher;
 	}

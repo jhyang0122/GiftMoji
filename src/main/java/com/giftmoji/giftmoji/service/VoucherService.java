@@ -33,7 +33,7 @@ public class VoucherService {
 	@Transactional
 	public Voucher issueVoucher(Integer expiryDays) {
 		int days = expiryDays != null ? expiryDays : DEFAULT_EXPIRY_DAYS;
-		LocalDateTime expiresAt = LocalDateTime.now().plus(days, ChronoUnit.DAYS);
+		LocalDateTime expiresAt = LocalDateTime.now(Voucher.LOCAL_ZONE).plus(days, ChronoUnit.DAYS);
 		Voucher voucher = Voucher.issue(generateCode(), expiresAt);
 		voucher = voucherRepository.save(voucher);
 		log.info("Issued voucher {} expiring at {}", maskCode(voucher.getCode()), voucher.getExpiresAt());
@@ -53,7 +53,7 @@ public class VoucherService {
 		}
 
 		Voucher voucher = found.get();
-		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime now = LocalDateTime.now(Voucher.LOCAL_ZONE);
 
 		if (voucher.getStatus() == VoucherStatus.REDEEMED) {
 			log.info("Voucher {} already redeemed at {}", maskCode(code), voucher.getRedeemedAt());
