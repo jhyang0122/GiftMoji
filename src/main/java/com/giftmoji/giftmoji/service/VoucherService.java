@@ -1,5 +1,8 @@
-package com.giftmoji.giftmoji.voucher;
+package com.giftmoji.giftmoji.service;
 
+import com.giftmoji.giftmoji.entity.Voucher;
+import com.giftmoji.giftmoji.entity.VoucherStatus;
+import com.giftmoji.giftmoji.repository.VoucherRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

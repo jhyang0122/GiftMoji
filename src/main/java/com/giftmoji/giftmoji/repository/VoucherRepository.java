@@ -1,5 +1,6 @@
-package com.giftmoji.giftmoji.voucher;
+package com.giftmoji.giftmoji.repository;
 
+import com.giftmoji.giftmoji.entity.Voucher;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

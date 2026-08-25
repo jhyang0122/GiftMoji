@@ -1,4 +1,6 @@
-package com.giftmoji.giftmoji.voucher;
+package com.giftmoji.giftmoji.service;
+
+import com.giftmoji.giftmoji.entity.Voucher;
 
 public sealed interface RedemptionResult {
 

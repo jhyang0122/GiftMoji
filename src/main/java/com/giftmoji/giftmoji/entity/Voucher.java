@@ -1,4 +1,4 @@
-package com.giftmoji.giftmoji.voucher;
+package com.giftmoji.giftmoji.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

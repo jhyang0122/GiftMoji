@@ -1,4 +1,4 @@
-package com.giftmoji.giftmoji.voucher;
+package com.giftmoji.giftmoji.service;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;

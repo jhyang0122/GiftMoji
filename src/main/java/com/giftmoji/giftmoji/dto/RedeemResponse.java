@@ -1,4 +1,7 @@
-package com.giftmoji.giftmoji.voucher;
+package com.giftmoji.giftmoji.dto;
+
+import com.giftmoji.giftmoji.entity.Voucher;
+import com.giftmoji.giftmoji.entity.VoucherStatus;
 
 public record RedeemResponse(String code, VoucherStatus status, String message) {
 
