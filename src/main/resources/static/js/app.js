@@ -22,6 +22,55 @@
 		btn.addEventListener("click", () => showScreen(btn.dataset.screen));
 	});
 
+	// ---------- account / sign-in ----------
+
+	const topbarAccount = document.getElementById("topbarAccount");
+
+	function getCsrfToken() {
+		const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+		return match ? decodeURIComponent(match[1]) : "";
+	}
+
+	function renderSignedOut() {
+		// Real page navigation, not fetch(): completing Google's OAuth
+		// redirect/consent handshake requires a top-level browser navigation.
+		topbarAccount.innerHTML = '<a class="ghost-btn" href="/oauth2/authorization/google">Sign in with Google</a>';
+	}
+
+	function renderSignedIn(user) {
+		topbarAccount.innerHTML =
+			'<span class="account-name">' + (user.displayName || user.email || "") + "</span>" +
+			'<button class="ghost-btn" id="signOutBtn">Sign out</button>';
+		document.getElementById("signOutBtn").addEventListener("click", signOut);
+	}
+
+	async function refreshAuthState() {
+		try {
+			const res = await fetch("/api/auth/me");
+			if (res.ok) {
+				renderSignedIn(await res.json());
+			} else {
+				renderSignedOut();
+			}
+		} catch (e) {
+			renderSignedOut();
+		}
+	}
+
+	async function signOut() {
+		try {
+			await fetch("/api/auth/logout", {
+				method: "POST",
+				headers: { "X-XSRF-TOKEN": getCsrfToken() },
+			});
+		} catch (e) {
+			// ignore network errors; still refresh below
+		}
+		refreshAuthState();
+	}
+
+	refreshAuthState();
+
 	// ---------- local wallet (per-device stand-in until real accounts exist) ----------
 
 	function loadWallet() {
