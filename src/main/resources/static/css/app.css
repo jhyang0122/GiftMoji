@@ -32,9 +32,7 @@ body {
 	background: var(--brand);
 	color: #fff;
 	padding: calc(0.9rem + env(safe-area-inset-top)) 1rem 0.9rem;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	text-align: center;
 	position: sticky;
 	top: 0;
 	z-index: 5;
@@ -44,17 +42,6 @@ body {
 	margin: 0;
 	font-size: 1.15rem;
 	font-weight: 600;
-}
-
-.topbar-account {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.topbar-account .account-name {
-	font-size: 0.8rem;
-	opacity: 0.9;
 }
 
 main {
