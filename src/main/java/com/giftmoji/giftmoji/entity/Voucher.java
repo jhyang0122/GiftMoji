@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,8 +19,11 @@ import java.util.UUID;
 @Getter
 public class Voucher {
 
+	// The Flyway-managed schema uses CHAR(36) for UUID PKs/FKs (portable
+	// across H2 and Azure SQL Server), not each dialect's native UUID type.
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
+	@JdbcTypeCode(SqlTypes.CHAR)
 	private UUID id;
 
 	private String code;
