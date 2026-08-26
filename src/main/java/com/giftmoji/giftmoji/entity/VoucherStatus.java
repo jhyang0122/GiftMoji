@@ -1,7 +1,10 @@
 package com.giftmoji.giftmoji.entity;
 
 public enum VoucherStatus {
-	ISSUED,
+	PURCHASED,
+	SENT,
+	VIEWED,
 	REDEEMED,
-	EXPIRED
+	EXPIRED,
+	CANCELLED
 }

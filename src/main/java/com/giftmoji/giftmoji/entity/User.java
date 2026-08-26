@@ -10,6 +10,7 @@ import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -19,8 +20,10 @@ import java.util.UUID;
 @Getter
 public class User {
 
-	// The Flyway-managed schema uses CHAR(36) for UUID PKs/FKs (portable
-	// across H2 and Azure SQL Server), not each dialect's native UUID type.
+	// MVP has no real payment gateway (spec §8) — every new user starts with
+	// a mocked wallet balance instead of a top-up flow.
+	private static final BigDecimal DEFAULT_STARTING_BALANCE = new BigDecimal("50.00");
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@JdbcTypeCode(SqlTypes.CHAR)
@@ -29,14 +32,23 @@ public class User {
 	@Column(nullable = false, unique = true)
 	private String googleId;
 
+	@Column(nullable = false, unique = true)
 	private String email;
 
 	private String displayName;
 
 	private String pictureUrl;
 
+	@Column(nullable = false)
+	private BigDecimal walletBalance;
+
+	@Column(nullable = false)
+	private boolean merchantStaff;
+
+	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
+	@Column(nullable = false)
 	private LocalDateTime lastLoginAt;
 
 	protected User() {
@@ -49,6 +61,8 @@ public class User {
 		user.email = email;
 		user.displayName = displayName;
 		user.pictureUrl = pictureUrl;
+		user.walletBalance = DEFAULT_STARTING_BALANCE;
+		user.merchantStaff = false;
 		LocalDateTime now = LocalDateTime.now();
 		user.createdAt = now;
 		user.lastLoginAt = now;
@@ -60,5 +74,26 @@ public class User {
 		this.displayName = displayName;
 		this.pictureUrl = pictureUrl;
 		this.lastLoginAt = LocalDateTime.now();
+	}
+
+	// Applied on every login (not just creation) so config-allowlist edits
+	// take effect on redeploy without a manual DB fix.
+	public void syncMerchantRole(boolean isMerchant) {
+		this.merchantStaff = isMerchant;
+	}
+
+	public boolean hasSufficientBalance(BigDecimal amount) {
+		return walletBalance.compareTo(amount) >= 0;
+	}
+
+	public void debit(BigDecimal amount) {
+		if (!hasSufficientBalance(amount)) {
+			throw new IllegalStateException("Insufficient wallet balance");
+		}
+		this.walletBalance = walletBalance.subtract(amount);
+	}
+
+	public void credit(BigDecimal amount) {
+		this.walletBalance = walletBalance.add(amount);
 	}
 }

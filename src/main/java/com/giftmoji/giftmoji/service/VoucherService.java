@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -19,7 +18,6 @@ public class VoucherService {
 
 	private static final Logger log = LoggerFactory.getLogger(VoucherService.class);
 
-	private static final int DEFAULT_EXPIRY_DAYS = 90;
 	private static final int CODE_ENTROPY_BYTES = 15;
 	private static final int CODE_LOG_PREFIX_LENGTH = 6;
 
@@ -30,18 +28,17 @@ public class VoucherService {
 		this.voucherRepository = voucherRepository;
 	}
 
-	@Transactional
-	public Voucher issueVoucher(Integer expiryDays) {
-		int days = expiryDays != null ? expiryDays : DEFAULT_EXPIRY_DAYS;
-		LocalDateTime expiresAt = LocalDateTime.now().plus(days, ChronoUnit.DAYS);
-		Voucher voucher = Voucher.issue(generateCode(), expiresAt);
-		voucher = voucherRepository.save(voucher);
-		log.info("Issued voucher {} expiring at {}", maskCode(voucher.getCode()), voucher.getExpiresAt());
-		return voucher;
-	}
-
 	public Optional<Voucher> findByCode(String code) {
 		return voucherRepository.findByCode(code);
+	}
+
+	// High-entropy, unguessable redemption token. Callers (GiftingService)
+	// pass this to Voucher.purchase(...) when creating a voucher for an
+	// item purchase.
+	public String generateVoucherCode() {
+		byte[] bytes = new byte[CODE_ENTROPY_BYTES];
+		secureRandom.nextBytes(bytes);
+		return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 	}
 
 	@Transactional
@@ -60,6 +57,11 @@ public class VoucherService {
 			return new RedemptionResult.AlreadyRedeemed(voucher);
 		}
 
+		if (voucher.getStatus() == VoucherStatus.CANCELLED) {
+			log.info("Redeem attempted for cancelled voucher {}", maskCode(code));
+			return new RedemptionResult.Cancelled(voucher);
+		}
+
 		if (voucher.getStatus() == VoucherStatus.EXPIRED || voucher.isExpired(now)) {
 			voucher.markExpired();
 			voucherRepository.save(voucher);
@@ -73,13 +75,7 @@ public class VoucherService {
 		return new RedemptionResult.Success(voucher);
 	}
 
-	private String generateCode() {
-		byte[] bytes = new byte[CODE_ENTROPY_BYTES];
-		secureRandom.nextBytes(bytes);
-		return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-	}
-
-	// Vouchers codes are the redemption secret, so log only a short prefix
+	// Voucher codes are the redemption secret, so log only a short prefix
 	// rather than the full high-entropy token.
 	private String maskCode(String code) {
 		if (code == null || code.length() <= CODE_LOG_PREFIX_LENGTH) {

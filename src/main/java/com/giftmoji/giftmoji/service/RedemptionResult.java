@@ -10,5 +10,7 @@ public sealed interface RedemptionResult {
 
 	record Expired(Voucher voucher) implements RedemptionResult {}
 
+	record Cancelled(Voucher voucher) implements RedemptionResult {}
+
 	record NotFound(String code) implements RedemptionResult {}
 }
