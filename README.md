@@ -2,6 +2,9 @@
 
 A Spring Boot service, deployed to Azure App Service (Linux, F1 free tier).
 
+See [`docs/DOMAIN_MODEL.md`](docs/DOMAIN_MODEL.md) for the domain model and
+the send → receive → redeem gifting flow (with diagrams).
+
 ## Stack
 - Java 21
 - Spring Boot 3.3.4
