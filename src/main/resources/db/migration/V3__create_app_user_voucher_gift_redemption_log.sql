@@ -14,11 +14,9 @@ CREATE TABLE voucher (
     id                    CHAR(36)      NOT NULL PRIMARY KEY,
     code                  NVARCHAR(64)  NOT NULL UNIQUE,
     status                NVARCHAR(20)  NOT NULL,
-    -- Nullable for now: Voucher.java doesn't map these yet (see
-    -- feature/gift-voucher-domain-model). Tighten to NOT NULL once it does.
-    item_id               CHAR(36)      REFERENCES item(id),
-    purchased_by_user_id  CHAR(36)      REFERENCES app_user(id),
-    current_holder_id     CHAR(36)      REFERENCES app_user(id),
+    item_id               CHAR(36)      NOT NULL REFERENCES item(id),
+    purchased_by_user_id  CHAR(36)      NOT NULL REFERENCES app_user(id),
+    current_holder_id     CHAR(36)      NOT NULL REFERENCES app_user(id),
     created_at            DATETIME2     NOT NULL,
     expires_at            DATETIME2     NOT NULL,
     redeemed_at           DATETIME2

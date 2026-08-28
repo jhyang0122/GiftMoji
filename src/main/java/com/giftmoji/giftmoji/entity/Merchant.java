@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
@@ -23,11 +24,14 @@ public class Merchant {
 	@JdbcTypeCode(SqlTypes.CHAR)
 	private UUID id;
 
+	@Nationalized
 	@Column(nullable = false)
 	private String name;
 
+	@Nationalized
 	private String description;
 
+	@Nationalized
 	private String logoUrl;
 
 	@Column(nullable = false)
