@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
@@ -29,14 +30,18 @@ public class User {
 	@JdbcTypeCode(SqlTypes.CHAR)
 	private UUID id;
 
+	@Nationalized
 	@Column(nullable = false, unique = true)
 	private String googleId;
 
+	@Nationalized
 	@Column(nullable = false, unique = true)
 	private String email;
 
+	@Nationalized
 	private String displayName;
 
+	@Nationalized
 	private String pictureUrl;
 
 	@Column(nullable = false)
