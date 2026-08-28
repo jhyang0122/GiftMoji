@@ -5,6 +5,7 @@ import com.giftmoji.giftmoji.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -65,7 +66,16 @@ public class GiftMojiOidcUserService extends OidcUserService {
 		// Applied on every login so a merchant-emails config change takes
 		// effect on redeploy without a manual DB fix.
 		user.syncMerchantRole(isMerchant);
-		userRepository.save(user);
+		try {
+			// Flushed immediately (rather than plain save()) so a unique-email
+			// collision — e.g. Google reassigning this address to a different
+			// account than the one that originally registered it — surfaces
+			// here as a clean login failure instead of an unhandled exception
+			// at commit time, after this method has already returned.
+			userRepository.saveAndFlush(user);
+		} catch (DataIntegrityViolationException e) {
+			throw new OAuth2AuthenticationException("Could not save user for this Google account");
+		}
 
 		return new DefaultOidcUser(authoritiesFor(isMerchant), oidcUser.getIdToken(), oidcUser.getUserInfo());
 	}

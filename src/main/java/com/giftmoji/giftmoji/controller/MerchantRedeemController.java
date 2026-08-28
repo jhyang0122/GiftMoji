@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 // Only reachable by an authenticated user with ROLE_MERCHANT
 // (see SecurityConfig: /api/merchant/** requires that role) — this is the
 // spec's "someone other than the receiver validates the code" flow.
@@ -37,7 +39,11 @@ public class MerchantRedeemController {
 
 	@PostMapping("/redeem")
 	public ResponseEntity<RedeemResponse> redeem(@AuthenticationPrincipal OidcUser principal, @RequestBody RedeemRequest request) {
-		User staff = userRepository.findByGoogleId(principal.getSubject()).orElseThrow();
+		Optional<User> staffOpt = principal == null ? Optional.empty() : userRepository.findByGoogleId(principal.getSubject());
+		if (staffOpt.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		User staff = staffOpt.get();
 		RedemptionResult result = redemptionService.redeemAsMerchant(request.code(), staff.getId());
 
 		if (result instanceof RedemptionResult.Success success) {
