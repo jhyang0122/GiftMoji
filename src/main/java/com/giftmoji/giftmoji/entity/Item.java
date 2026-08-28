@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
@@ -28,14 +29,17 @@ public class Item {
 	@JdbcTypeCode(SqlTypes.CHAR)
 	private UUID merchantId;
 
+	@Nationalized
 	@Column(nullable = false)
 	private String name;
 
+	@Nationalized
 	private String description;
 
 	@Column(nullable = false)
 	private BigDecimal price;
 
+	@Nationalized
 	private String imageUrl;
 
 	@Column(nullable = false)

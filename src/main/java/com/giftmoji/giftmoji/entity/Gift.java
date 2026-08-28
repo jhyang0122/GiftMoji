@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
@@ -35,6 +36,7 @@ public class Gift {
 	@JdbcTypeCode(SqlTypes.CHAR)
 	private UUID receiverId;
 
+	@Nationalized
 	private String message;
 
 	@Column(nullable = false)
