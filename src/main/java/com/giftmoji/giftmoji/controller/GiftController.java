@@ -76,6 +76,9 @@ public class GiftController {
 		if (result instanceof GiftSendResult.SelfGift) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		}
+		if (result instanceof GiftSendResult.MessageTooLong) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+		}
 		return ResponseEntity.notFound().build();
 	}
 

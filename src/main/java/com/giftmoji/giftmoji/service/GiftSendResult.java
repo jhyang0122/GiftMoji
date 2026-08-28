@@ -13,4 +13,6 @@ public sealed interface GiftSendResult {
 	record ReceiverNotFound() implements GiftSendResult {}
 
 	record SelfGift() implements GiftSendResult {}
+
+	record MessageTooLong() implements GiftSendResult {}
 }

@@ -25,6 +25,9 @@ public class GiftingService {
 
 	private static final Logger log = LoggerFactory.getLogger(GiftingService.class);
 
+	// Matches gift.message NVARCHAR(1000) in the schema.
+	private static final int MAX_MESSAGE_LENGTH = 1000;
+
 	private final VoucherRepository voucherRepository;
 	private final GiftRepository giftRepository;
 	private final UserRepository userRepository;
@@ -57,6 +60,10 @@ public class GiftingService {
 
 	@Transactional
 	public GiftSendResult sendGift(UUID senderId, UUID itemId, String receiverEmail, String message) {
+		if (message != null && message.length() > MAX_MESSAGE_LENGTH) {
+			return new GiftSendResult.MessageTooLong();
+		}
+
 		Optional<Item> itemOpt = catalogService.getActiveItem(itemId);
 		if (itemOpt.isEmpty()) {
 			return new GiftSendResult.ItemNotFound();

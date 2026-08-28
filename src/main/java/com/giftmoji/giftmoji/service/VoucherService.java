@@ -65,6 +65,13 @@ public class VoucherService {
 			return new RedemptionResult.Expired(voucher);
 		}
 
+		// Only a voucher actually gifted to a receiver (SENT/VIEWED) is
+		// redeemable — a PURCHASED voucher hasn't reached anyone yet.
+		if (voucher.getStatus() != VoucherStatus.SENT && voucher.getStatus() != VoucherStatus.VIEWED) {
+			log.warn("Redeem attempted for voucher {} not yet sent (status {})", maskCode(code), voucher.getStatus());
+			return new RedemptionResult.NotFound(code);
+		}
+
 		voucher.markRedeemed(now);
 		voucherRepository.save(voucher);
 		log.info("Voucher {} redeemed", maskCode(code));
