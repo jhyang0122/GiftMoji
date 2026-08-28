@@ -63,6 +63,9 @@ public class GiftingService {
 		}
 		Item item = itemOpt.get();
 
+		if (receiverEmail == null || receiverEmail.isBlank()) {
+			return new GiftSendResult.ReceiverNotFound();
+		}
 		Optional<User> receiverOpt = userRepository.findByEmail(receiverEmail.toLowerCase());
 		if (receiverOpt.isEmpty()) {
 			return new GiftSendResult.ReceiverNotFound();
@@ -94,8 +97,28 @@ public class GiftingService {
 		return new GiftSendResult.Success(gift);
 	}
 
-	@Transactional
+	// Read-only: safe for GET, so link prefetching/scanning/image proxies
+	// can't silently mark a gift viewed and disable sender cancellation.
+	@Transactional(readOnly = true)
 	public GiftViewResult getGiftDetailForViewer(UUID giftId, UUID viewerId) {
+		Optional<Gift> giftOpt = giftRepository.findById(giftId);
+		if (giftOpt.isEmpty()) {
+			return new GiftViewResult.NotFound();
+		}
+		Gift gift = giftOpt.get();
+
+		if (!gift.getSenderId().equals(viewerId) && !gift.getReceiverId().equals(viewerId)) {
+			return new GiftViewResult.Forbidden();
+		}
+
+		Voucher voucher = voucherRepository.findById(gift.getVoucherId()).orElseThrow();
+		return new GiftViewResult.Success(gift, voucher);
+	}
+
+	// Mutates state — only call from a receiver-initiated action (spec §4.4:
+	// once viewed, the sender's cancel/refund is permanently disabled).
+	@Transactional
+	public GiftViewResult markGiftViewed(UUID giftId, UUID viewerId) {
 		Optional<Gift> giftOpt = giftRepository.findById(giftId);
 		if (giftOpt.isEmpty()) {
 			return new GiftViewResult.NotFound();

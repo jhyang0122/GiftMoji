@@ -127,6 +127,27 @@ public class GiftController {
 		return ResponseEntity.notFound().build();
 	}
 
+	// Receiver-initiated: the only path that marks a gift VIEWED (spec §4.4).
+	// The SPA should call this once when the receiver actually opens the
+	// gift detail view — not on every GET, which must stay side-effect-free.
+	@PostMapping("/{giftId}/view")
+	public ResponseEntity<GiftDetailResponse> markViewed(@AuthenticationPrincipal OidcUser principal, @PathVariable UUID giftId) {
+		Optional<User> viewerOpt = currentUser(principal);
+		if (viewerOpt.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		User viewer = viewerOpt.get();
+
+		GiftViewResult result = giftingService.markGiftViewed(giftId, viewer.getId());
+		if (result instanceof GiftViewResult.Success success) {
+			return ResponseEntity.ok(toDetailResponse(success.gift(), success.voucher(), viewer.getId()));
+		}
+		if (result instanceof GiftViewResult.Forbidden) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		return ResponseEntity.notFound().build();
+	}
+
 	@PostMapping("/{giftId}/cancel")
 	public ResponseEntity<GiftDetailResponse> cancel(@AuthenticationPrincipal OidcUser principal, @PathVariable UUID giftId) {
 		Optional<User> requesterOpt = currentUser(principal);
