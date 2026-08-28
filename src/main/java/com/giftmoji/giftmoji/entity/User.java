@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
@@ -29,14 +30,18 @@ public class User {
 	@JdbcTypeCode(SqlTypes.CHAR)
 	private UUID id;
 
+	@Nationalized
 	@Column(nullable = false, unique = true)
 	private String googleId;
 
+	@Nationalized
 	@Column(nullable = false, unique = true)
 	private String email;
 
+	@Nationalized
 	private String displayName;
 
+	@Nationalized
 	private String pictureUrl;
 
 	@Column(nullable = false)
@@ -58,7 +63,7 @@ public class User {
 	public static User createFromGoogle(String googleId, String email, String displayName, String pictureUrl) {
 		User user = new User();
 		user.googleId = googleId;
-		user.email = email;
+		user.email = email.toLowerCase();
 		user.displayName = displayName;
 		user.pictureUrl = pictureUrl;
 		user.walletBalance = DEFAULT_STARTING_BALANCE;
@@ -70,7 +75,7 @@ public class User {
 	}
 
 	public void recordLogin(String email, String displayName, String pictureUrl) {
-		this.email = email;
+		this.email = email.toLowerCase();
 		this.displayName = displayName;
 		this.pictureUrl = pictureUrl;
 		this.lastLoginAt = LocalDateTime.now();
