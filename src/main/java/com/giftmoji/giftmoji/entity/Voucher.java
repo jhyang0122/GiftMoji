@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
@@ -26,8 +27,10 @@ public class Voucher {
 	@JdbcTypeCode(SqlTypes.CHAR)
 	private UUID id;
 
+	@Nationalized
 	private String code;
 
+	@Nationalized
 	@Enumerated(EnumType.STRING)
 	private VoucherStatus status;
 
