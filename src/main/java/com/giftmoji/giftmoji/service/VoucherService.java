@@ -28,10 +28,6 @@ public class VoucherService {
 		this.voucherRepository = voucherRepository;
 	}
 
-	public Optional<Voucher> findByCode(String code) {
-		return voucherRepository.findByCode(code);
-	}
-
 	// High-entropy, unguessable redemption token. Callers (GiftingService)
 	// pass this to Voucher.purchase(...) when creating a voucher for an
 	// item purchase.

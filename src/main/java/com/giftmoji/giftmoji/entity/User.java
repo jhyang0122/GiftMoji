@@ -13,6 +13,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -63,7 +64,7 @@ public class User {
 	public static User createFromGoogle(String googleId, String email, String displayName, String pictureUrl) {
 		User user = new User();
 		user.googleId = googleId;
-		user.email = email.toLowerCase();
+		user.email = Objects.requireNonNull(email, "email").toLowerCase();
 		user.displayName = displayName;
 		user.pictureUrl = pictureUrl;
 		user.walletBalance = DEFAULT_STARTING_BALANCE;
@@ -75,7 +76,7 @@ public class User {
 	}
 
 	public void recordLogin(String email, String displayName, String pictureUrl) {
-		this.email = email.toLowerCase();
+		this.email = Objects.requireNonNull(email, "email").toLowerCase();
 		this.displayName = displayName;
 		this.pictureUrl = pictureUrl;
 		this.lastLoginAt = LocalDateTime.now();

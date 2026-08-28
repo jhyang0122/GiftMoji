@@ -92,6 +92,7 @@ public class Voucher {
 			throw new IllegalStateException("Voucher can only be cancelled while SENT and unviewed, was " + this.status);
 		}
 		this.status = VoucherStatus.CANCELLED;
+		this.currentHolderId = purchasedByUserId;
 	}
 
 	public boolean isExpired(LocalDateTime now) {

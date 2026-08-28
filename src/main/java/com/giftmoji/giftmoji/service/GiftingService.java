@@ -129,7 +129,9 @@ public class GiftingService {
 			return new GiftViewResult.Forbidden();
 		}
 
-		Voucher voucher = voucherRepository.findById(gift.getVoucherId()).orElseThrow();
+		// Locked like cancelGift/redeem so a concurrent cancel or redemption
+		// can't be silently overwritten by this transaction's stale read.
+		Voucher voucher = voucherRepository.findByIdForUpdate(gift.getVoucherId()).orElseThrow();
 
 		if (viewerId.equals(gift.getReceiverId()) && voucher.getStatus() == VoucherStatus.SENT) {
 			voucher.markViewed();

@@ -43,9 +43,14 @@ public class GiftMojiOidcUserService extends OidcUserService {
 
 		String googleId = oidcUser.getSubject();
 		String email = oidcUser.getEmail();
+		if (email == null || email.isBlank()) {
+			// email is required (app_user.email is NOT NULL, and receivers are
+			// looked up by it) — fail the login cleanly rather than NPE later.
+			throw new OAuth2AuthenticationException("Google account has no email");
+		}
 		String displayName = oidcUser.getFullName();
 		String pictureUrl = oidcUser.getPicture();
-		boolean isMerchant = email != null && merchantEmails.contains(email.toLowerCase());
+		boolean isMerchant = merchantEmails.contains(email.toLowerCase());
 
 		User user;
 		Optional<User> existing = userRepository.findByGoogleId(googleId);

@@ -28,8 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/gifts")
@@ -79,16 +82,14 @@ public class GiftController {
 	@GetMapping("/received")
 	public ResponseEntity<List<GiftSummaryResponse>> received(@AuthenticationPrincipal OidcUser principal) {
 		return currentUser(principal)
-				.map(user -> ResponseEntity.ok(giftingService.receivedGifts(user.getId())
-						.stream().map(g -> toSummary(g, user.getId())).toList()))
+				.map(user -> ResponseEntity.ok(toSummaries(giftingService.receivedGifts(user.getId()), user.getId())))
 				.orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 	}
 
 	@GetMapping("/sent")
 	public ResponseEntity<List<GiftSummaryResponse>> sent(@AuthenticationPrincipal OidcUser principal) {
 		return currentUser(principal)
-				.map(user -> ResponseEntity.ok(giftingService.sentGifts(user.getId())
-						.stream().map(g -> toSummary(g, user.getId())).toList()))
+				.map(user -> ResponseEntity.ok(toSummaries(giftingService.sentGifts(user.getId()), user.getId())))
 				.orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 	}
 
@@ -187,11 +188,25 @@ public class GiftController {
 		return GiftDetailResponse.from(gift, voucher, item, counterparty);
 	}
 
-	private GiftSummaryResponse toSummary(Gift gift, UUID viewerId) {
-		Voucher voucher = voucherRepository.findById(gift.getVoucherId()).orElseThrow();
-		Item item = itemRepository.findById(voucher.getItemId()).orElseThrow();
-		User counterparty = userRepository.findById(counterpartyId(gift, viewerId)).orElseThrow();
-		return GiftSummaryResponse.from(gift, voucher, item, counterparty);
+	// Batches the voucher/item/user lookups behind a gift list into a
+	// handful of queries instead of one round trip per gift per entity
+	// (three N+1s otherwise) — matters on the F1 tier's limited resources.
+	private List<GiftSummaryResponse> toSummaries(List<Gift> gifts, UUID viewerId) {
+		Map<UUID, Voucher> vouchersById = voucherRepository.findAllById(gifts.stream().map(Gift::getVoucherId).toList())
+				.stream().collect(Collectors.toMap(Voucher::getId, Function.identity()));
+		Map<UUID, Item> itemsById = itemRepository.findAllById(vouchersById.values().stream().map(Voucher::getItemId).toList())
+				.stream().collect(Collectors.toMap(Item::getId, Function.identity()));
+		Map<UUID, User> usersById = userRepository.findAllById(gifts.stream().map(g -> counterpartyId(g, viewerId)).toList())
+				.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
+		return gifts.stream()
+				.map(gift -> {
+					Voucher voucher = vouchersById.get(gift.getVoucherId());
+					Item item = itemsById.get(voucher.getItemId());
+					User counterparty = usersById.get(counterpartyId(gift, viewerId));
+					return GiftSummaryResponse.from(gift, voucher, item, counterparty);
+				})
+				.toList();
 	}
 
 	private UUID counterpartyId(Gift gift, UUID viewerId) {
