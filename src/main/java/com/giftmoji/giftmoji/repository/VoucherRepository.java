@@ -13,8 +13,6 @@ import java.util.UUID;
 
 public interface VoucherRepository extends JpaRepository<Voucher, UUID> {
 
-	Optional<Voucher> findByCode(String code);
-
 	// Redemption reads-then-writes based on current status, so the row must
 	// stay locked for the duration of the transaction: otherwise two
 	// concurrent redeem requests can both read a redeemable status and both

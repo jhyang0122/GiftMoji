@@ -5,11 +5,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -30,21 +33,18 @@ public class SecurityConfig {
 			auth.requestMatchers(
 					"/", "/index.html", "/css/**", "/js/**", "/icons/**",
 					"/manifest.webmanifest", "/service-worker.js",
-					"/api/status", "/api/voucher/**", "/api/auth/**",
+					"/api/status", "/api/auth/**",
 					"/oauth2/**", "/login/**"
 			).permitAll();
 			if (h2ConsoleEnabled) {
 				auth.requestMatchers("/h2-console/**").permitAll();
 			}
+			auth.requestMatchers("/api/merchant/**").hasRole("MERCHANT");
 			auth.anyRequest().authenticated();
 		});
 
 		http.csrf(csrf -> {
 			csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
-			// Voucher endpoints are anonymous and not user-linked yet (that
-			// wiring is a separate follow-up), so keep app.js's existing
-			// fetch() calls to them working unchanged.
-			csrf.ignoringRequestMatchers("/api/voucher/**");
 			if (h2ConsoleEnabled) {
 				// H2 console's own login form doesn't send Spring's CSRF token.
 				csrf.ignoringRequestMatchers("/h2-console/**");
@@ -55,6 +55,16 @@ public class SecurityConfig {
 			// H2 console renders in a frame; only relax this locally.
 			http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 		}
+
+		// The frontend is a fetch()-driven SPA, not server-rendered pages, so
+		// an unauthenticated call to a protected /api/** endpoint should get
+		// a plain 401 the client can branch on — not the default
+		// redirect-to-Google-login response oauth2Login() otherwise sends
+		// for any unauthenticated request.
+		http.exceptionHandling(exceptionHandling -> exceptionHandling.defaultAuthenticationEntryPointFor(
+				new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+				new AntPathRequestMatcher("/api/**")
+		));
 
 		http.oauth2Login(oauth2 -> oauth2
 				.userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
